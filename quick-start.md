@@ -549,7 +549,7 @@ Let's test our app again. You will need to restart the app to see the changes. O
 
 `Show me all the employees for company C1203939`
 
-You should see a table with all the employees for the company you requested for. Please note you don't have to type the same prompts as the ones here. You can can type whatever you want and Raszzle will try to figure out what you mean and match you to the right action.
+You should see a table with all the employees for the company you requested for. Please note you don't have to type the same prompts as the ones here. You can can type whatever you want and Razzle will try to figure out what you mean and match you to the right action.
 
 [Get employees image]
 
