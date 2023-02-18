@@ -6,4 +6,10 @@ Thise documentationg is devided in two, the first part if targeted at developers
 
 ## Razzle for Developers
 
-Table of contents: <br /> - [Quick Start](quick-start.md) <br /> - [Razzle Concepts](concepts.md) <br /> - [Razzle Widgets](components.md)
+Table of contents: <br />
+
+- [Quick Start](quick-start.md) <br />
+
+- [Workspaces and apps](workspaces.md) <br />
+- [Actions](actions.md) <br />
+- [Razzle Widgets](components.md)
