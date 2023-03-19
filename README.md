@@ -40,7 +40,6 @@ We are still on this journey and if you want to be part of it, please join us on
 **Table of contents:** <br />
 
 - [Quick Start](quick-start.md) <br />
-
 - [Actions](actions.md) <br />
 - [Razzle Widgets](components.md)
 
