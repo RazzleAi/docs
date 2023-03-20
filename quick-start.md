@@ -2,7 +2,7 @@
 
 ### Sign up for a free account
 
-Head over to [Razzle](https://app.razzle.network) and sign up for a free account. Right now we are in beta and you can only signup with a gmail account. Follow the instructions to create your account until you arrive at chat screen.
+Head over to [Razzle](https://app.getrazzle.com) and sign up for a free account. Right now we are in beta and you can only signup with a gmail account. Follow the instructions to create your account until you arrive at chat screen.
 
 ### Create a new app
 
