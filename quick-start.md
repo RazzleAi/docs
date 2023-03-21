@@ -47,258 +47,317 @@ In your project you can initialize the sdk like in this example below
 Razzle.app({
   appId: process.env.RAZZLE_APP_ID, // You can also replace this environment variable with actual values
   apiKey: process.env.RAZZLE_API_KEY,
-  modules: [{}],
+  modules: [{ }],
 });
 ```
+
+## Let's build
+
+For the purpose of this documentation we will build a simple app. What's simpler than a todo list app?
+We would have functionality for adding, removing and listing todos also for marking todos as done. Seems simple enough right?
+
+<br />
 
 ## Now let's talk modules
 
 <br />
 
-Modules are the building blocks of your app. A module would typically be a class that contains a group of actions that can be performed by your Razzle App
+Modules are the building blocks of your app. A module would typically be a class that contains a group of actions that can be performed by your Razzle App.
 
-## Building the Razzle App
+That being said, let's create a module for our todo app. This file the skeleton of our module.
 
-Let's create a module for our app. We will call it `expense-manager.ts`. Let's create it as an empty class for now.
+Let's call the file `todo.module.ts`
 
-```ts
-export class ExpenseManagerModule {}
-```
-
-Now let's register on the on the Razzle app.
-
-```ts
-Razzle.app({
-  appId: process.env.RAZZLE_APP_ID,
-  apiKey: process.env.RAZZLE_API_KEY,
-  modules: [
-    // Register the module here with the service as a dependency
-    { module: ExpenseManagerModule, deps: [new ExpenseManagerService()] },
-  ],
-});
-```
-
-Here we registering the module and also registering the service as a dependency so it will be injected into the module constructor.
-
-Let's flesh out our module. We will add a new action to show us all the companies available in our app.
-
-```ts
+```typescript
 import { Action, ActionParam } from "@razzledotai/sdk";
+import { RazzleResponse, RazzleText } from "@razzledotai/widgets";
 
-export class ExpenseManagerModule {
-  constructor(private readonly expenseManagerService: ExpenseManagerService) {}
+export default class TodoModule {
+  @Action({
+    name: "createTodoList",
+    description: "Creates a new todo list",
+  })
+  createTodoList(@ActionParam("name") name: string) {
+    return new RazzleResponse({
+      ui: new RazzleText({
+        text: "Created todo list",
+      }),
+    });
+  }
 
   @Action({
-    name: "getCompanies",
-    description: "Get all companies",
+    name: "addTodo",
+    description: "Adds a new todo to a todo list",
   })
-  getCompanies(): RazzleResponse {
-    const companies = this.expenseManagerService.listCompanies();
+  addTodo(
+    @ActionParam("todoListName") todoListName: string,
+    @ActionParam("todo") todo: string
+  ) {
+    return new RazzleResponse({
+      ui: new RazzleText({
+        text: "Added todo to list",
+      }),
+    });
+  }
+
+  @Action({
+    name: "completeTodo",
+    description: "Marks a todo as complete",
+  })
+  completeTodo(
+    @ActionParam("todoListName") todoListName: string,
+    @ActionParam("todo") todo: string
+  ) {
+    return new RazzleResponse({
+      ui: new RazzleText({
+        text: "Completed todo",
+      }),
+    });
+  }
+
+  @Action({
+    name: "deleteTodo",
+    description: "Deletes a todo from a todo list",
+  })
+  deleteTodo(
+    @ActionParam("todoListName") todoListName: string,
+  ) {
+    return new RazzleResponse({
+      ui: new RazzleText({
+        text: "Deleted todo",
+      }),
+    });
   }
 }
+
+```
+**...before we go any further, let's talk about `Actions`**
+
+Actions are bassically a javascript methond inside a module and forms the smallest unit of functionality in your app. An action can be invoked by the user if they type in a prompt that our system matches to the action. Actions are denoted by the `@Action` decorator.
+
+Action always return a `RazzleResponse` object. This object is used to send a response back to the user. The `RazzleResponse` can also be used to add addtional context to your users session via the `addToContext` property.
+
+For now we are only going to use the `ui` property of the `RazzleResponse` object. This property is used to define the UI that will be displayed to the user. The UI can be a simple text message or a more complex UI that can be built using the widgets library.
+
+<br />
+
+**let's talk about the `@Action` decorator**
+
+The `@Action` decorator is used to define an action. It takes in an object with the following properties
+
+- `name` - The name of the action. This is the name that will be used to invoke the action. This is also the name that will be displayed in the Razzle App dashboard.
+- `description` - The description of the action. This is the description that will be displayed in the Razzle App dashboard.
+
+**now let's talk about the `@ActionParam` decorator**
+
+The `@ActionParam` decorator is used to define an action parameter. It takes in an object with the following properties
+
+- `name` - The name of the parameter. This is the name that will be used to invoke the action. This is also the name that will be displayed in the Razzle App dashboard.
+
+Now that we have gotten that out of the way, let's add the module to our app.
+
+```typescript
+
+Razzle.app({
+  appId: process.env.RAZZLE_APP_ID, 
+  apiKey: process.env.RAZZLE_API_KEY,
+  modules: [{ module: TodoModule, deps: [] }], // Add the module here
+});
+
 ```
 
-At the entry point of our app (usually `index.ts` or `main.ts`), let's start a server so we can have a long running process.
 
-It should look something like this.
+Let's start our app again and see what happens. You should see an `App Sync succcessful` message and looking at your razzle app your should see the new actions that you have created.
 
-```ts
-function startApp() {
-  Razzle.app({
-    appId: process.env.RAZZLE_APP_ID,
-    apiKey: process.env.RAZZLE_API_KEY,
-    modules: [
-      // { module: TodoModule, deps: [new TodoService()] },
-      { module: ExpenseManagerModule, deps: [new ExpenseManagerService()] },
-    ],
-  });
+As a matter of fact you can already start playing around with your app. You can see samples in the examples below
 
-  const server = http.createServer((req, res) => {
-    res.writeHead(200, { "Content-Type": "text/plain" });
-    res.write("Hello World!");
-    res.end();
-  });
+<br />
 
-  server.listen(7000, "localhost", () => {
-    console.log("Server started on port 7000");
-  });
+![Create app gif](assets/test-skeleton.gif)
+
+<br />
+
+## Let's make our app more useful
+
+Now we're going to introduce a new file called `models.ts`. This file will contain the shape of the todo list and the todo items objects.
+
+```typescript
+
+export interface TodoList {
+  name: string;
+  items: TodoListItem[];
 }
 
-startApp();
-```
-
-we should also include a tsconfig file that enables experimental decorators and an ES5 target. Here is an example.
-
-```json
-{
-  "compileOnSave": false,
-  "compilerOptions": {
-    "rootDir": "src",
-    "outDir": "dist",
-    "sourceMap": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "target": "ES5"
-  }
+export interface TodoListItem {
+  name: string;
+  completed: boolean;
 }
+
 ```
 
-Build the app by running
+Now I'm going to add a todo list object to the top of our `TodoModule` class. This object will be used to store our todo lists.
 
-```bash
-tsc
+```typescript
+
+export default class TodoModule {
+
+  todoLists: TodoList[] = []; // new
+
+  ...
+
+}
+
 ```
 
-or
+Now let's update our `createTodoList` action to add the new todo list to our `todoLists` array.
 
-if you don't have typescript installed globally.
+```typescript
 
-```bash
-npx tsc
-```
-
-Now let's run the app.
-
-```bash
-node dist/main.js
-```
-
-You should see an `App Sync succcessful` message in the console. This means the app has been successfully synced with Razzle.
-
-Now let's test our app. Open razzle and refresh the page. In other to use the app you just created you need to add it to a workspace.
-
-You can do this by simply telling razzle that's what you want to do.
-
-You can do this by typing
-
-`"I want to add some apps to this workspace"`
-
-[Add app gif]
-
-You should be presented with a list of apps. Select "Add to workspace" on the app you just created.
-
-You should see a confirmation message that the app has been added to the workspace.
-
-Let's update our action to return a response that razzle can understand. As a rule of thumb you should always return a `RazzleResponse` object from your actions. `RazzleResponse` is found in the `@razzledotai/widgets` package.
-
-so let's update the action to look like this.
-
-```ts
-
-getCompanies(): RazzleResponse {
-    const companies = this.expenseManagerService.listCompanies();
-
-    // Return a RazzleResponse object
+  @Action({
+    name: "createTodoList",
+    description: "Creates a new todo list",
+  })
+  createTodoList(@ActionParam("name") name: string) {
+    this.todoLists.push({
+      name: todoListName.toLowerCase(),
+      items: [],
+    });
 
     return new RazzleResponse({
-      ui: new RazzleContainer({
-        padding: WidgetPadding.all(10),
-        title: "All Companies",
-        body: new RazzleColumn({
-          children: companies.map((company) => {
-            return new RazzleColumn({
-              crossAxisAlignment: "center",
-              children: [
-                new RazzleText({ text: company.name }),
-                new RazzleRow({
-                  spacing: 20,
-                  mainAxisAlignment: "center",
-                  children: [
-                    new RazzleLink({
-                      action: {
-                        action: "getCompany",
-                        label: "Manage",
-                        args: [company.id],
-                      },
-                    }),
-                    new RazzleLink({
-                      action: {
-                        action: "listCardsByCompany",
-                        label: "List cards",
-                        args: [company.id],
-                      },
-                    }),
-                  ],
-                }),
-              ],
-            });
-          }),
-        }),
+      ui: new RazzleText({
+        text: "Created todo list",
       }),
     });
   }
 
 ```
 
-If you notice in the code about the `RazzleResponse` has a UI property. This is how we declare UI elements to display our data or collect data from the user.
+ then we update our `addTodo` action to add the new todo to the todo list.
 
-Razzle utilizes a declarative UI framework similer to the one used in Flutter, SwiftUI or Jetpack Compose. You can see more on how to build UIs with Razzle [here](widgets/index.md).
+ ```typescript
 
-Let's test our app again,
-
-You can type
-
-`Show me all the companies available `
-
-This should return a list of companies. See image below.
-
-[Get companies image]
-
-Congratulations! You have successfully built your first Razzle app. Now let's add some more actions to our app.
-
-The next action will list out all the employees a company has. Simply by supplying the company id.
-
-```ts
-
-@Action({
-    name: "getEmployeesByCompany",
-    description: "Get all employees by company",
+  @Action({
+    name: "addTodo",
+    description: "Adds a new todo to a todo list",
   })
-  getEmployeesByCompany(@ActionParam("companyId") id: string) {
-    const employees = this.expenseManagerService.listEmployeesByCompany(id);
-    const data: string[][] = [];
-    for (const employee of employees) {
-      data.push([employee.firstName, employee.lastName, employee.email]);
+  addTodo(
+    @ActionParam("todoListName") todoListName: string,
+    @ActionParam("todo") todo: string
+  ) {
+    const todoList = this.todoLists.find((list) => list.name === todoListName);
+
+    if (!todoList) {
+      return new RazzleResponse({
+        ui: new RazzleText({
+          text: "Todo list not found",
+        }),
+      });
     }
+
+    todoList.items.push({
+      name: todo,
+      completed: false,
+    });
+
     return new RazzleResponse({
-      ui: new RazzleContainer({
-        body: new RazzleColumn({
-          children: [
-            new RazzleText({ text: "All Employees" }),
-            new RazzleTable({
-              columns: [
-                {
-                  id: "firstName",
-                  header: "First Name",
-                },
-                {
-                  id: "lastname",
-                  header: "Last Name",
-                },
-                {
-                  id: "email",
-                  header: "Email",
-                },
-              ],
-              data: data,
-            }),
-          ],
-        }),
+      ui: new RazzleText({
+        text: "Added todo to list",
       }),
     });
   }
+ ```
+
+Now let's update our `completeTodo` action to mark the todo as complete.
+
+```typescript
+
+  @Action({
+    name: "completeTodo",
+    description: "Marks a todo as complete",
+  })
+  completeTodo(
+    @ActionParam("todoListName") todoListName: string,
+    @ActionParam("todo") todo: string
+  ) {
+    const todoList = this.todoLists.find((list) => list.name === todoListName);
+
+    if (!todoList) {
+      return new RazzleResponse({
+        ui: new RazzleText({
+          text: `Todo list ${todoListName} not found`,
+        }),
+      });
+    }
+
+    const todoItem = todoList.items.find((item) => item.name === todo);
+
+    if (!todoItem) {
+      return new RazzleResponse({
+        ui: new RazzleText({
+          text: `Todo item ${todo} not found in todo list ${todoListName}`,
+        }),
+      });
+    }
+
+    // Update the todo list
+
+    this.todoLists = this.todoLists.map((list) => {
+      if (list.name === todoListName) {
+        return {
+          ...list,
+          items: list.items.map((item) => {
+            if (item.name === todo) {
+              return {
+                ...item,
+                completed: true,
+              };
+            }
+
+            return item;
+          }),
+        };
+      }
+
+      return list;
+    });
+
+    return new RazzleResponse({
+      ui: new RazzleText({
+        text: "Completed todo",
+      }),
+    });
+  }
+
 ```
 
-Let's test our app again. You will need to restart the app to see the changes. Once that is done you can type
+Now let's add some code to delete a todo list.
 
-`Show me all the employees for company C1203939`
+```typescript
 
-You should see a table with all the employees for the company you requested for. Please note you don't have to type the same prompts as the ones here. You can can type whatever you want and Razzle will try to figure out what you mean and match you to the right action.
+  @Action({
+    name: "deleteTodoList",
+    description: "Deletes a todo list",
+  })
+  deleteTodoList(@ActionParam("name") name: string) {
+    this.todoLists = this.todoLists.filter((list) => list.name !== name);
 
-[Get employees image]
+    return new RazzleResponse({
+      ui: new RazzleText({
+        text: "Deleted todo list",
+      }),
+    });
+  }
 
-You can type for example:
+```
 
-`Who are the employees for company with ID C1203939`
+Now that we've updated our module let's take our app for a spin! Restart the app and go to the Razzle App dashboard.
 
-You can find a full implementation of the app [here](https://github.com/RazzleAi/demo)
+Let's see a preview
+
+![Create app gif](assets/triggering-actions.gif)
+
+<br />
+
+## Don't be afraid to get exotic.
+
+You don't have to type in exact phrases to trigger your actions. You can use synonyms and even abbreviations. For example, you can say `create a todo list` or `create todo list` or `create a todo` or `create todo` or `add a new todo list` and razzle should be able to understand what you mean and route your requests to the appropriate action. You can also write in prompts that take multiple actions at once.
